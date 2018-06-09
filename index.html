@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+        <style>
+            #drop_zone {
+                border: 10px dashed #ccc;
+                min-width: 300px;
+                min-height: 300px;
+            }
+            #drop_zone:hover {
+                border: 10px dashed #0c0;
+            }
+            #slider {
+                margin-top: 1em;
+                margin-bottom: 1em;
+                margin-right: 2em;
+                margin-left: 0.5em;
+            }
+            #custom-handle {
+                width: 3em;
+                height: 1.6em;
+                top: 50%;
+                margin-top: -.8em;
+                text-align: center;
+                line-height: 1.6em;
+            }
+        </style>
+    </head>
+    <title>Image</title>
+    <p>Drop image file here :</p>
+    <div id="drop_zone"></div>
+    <div id="slider">
+        <div id="custom-handle" class="ui-slider-handle"></div>
+    </div>
+    <button onclick="processImage()">Process</button>
+    <body>
+    </body>
+    <footer>
+        <script>
+            var drop_zone = document.getElementById("drop_zone");
+            var accepted_types = ["image/png", "image/jpeg"]
+            drop_zone.ondragover = function (e) {e.preventDefault(); console.log("ondragover");};
+            drop_zone.ondrop = function (e) {e.preventDefault(); console.log("ondrop"); readFiles(e.dataTransfer.files);};
+
+            function readFiles(files) {
+                console.log(files);
+                for (var i=0; i<files.length; i++) {
+                    var imgFile = files[i];
+                    console.log(imgFile.type);
+                    if ($.inArray(imgFile.type, accepted_types)) {
+                        var reader = new FileReader();
+                        reader.onload = function (event) {
+                            console.log("onload");
+                            var image = new Image();
+                            image.src = event.target.result;
+
+                            image.onload = function (event) {
+                                var canvas = document.createElement("canvas");
+                                canvas.width = image.width;
+                                canvas.height = image.height;
+                                var ctx = canvas.getContext("2d");
+                                ctx.drawImage(image, 0, 0);
+                                $("#dropped_image").remove();
+                                canvas.id = "dropped_image";
+                                drop_zone.appendChild(canvas);
+
+                                var work_canvas = document.createElement("canvas");
+                                work_canvas.width = image.width;
+                                work_canvas.height = image.height;
+                                var work_ctx = work_canvas.getContext("2d");
+                                work_ctx.drawImage(image, 0, 0);
+                                $("#work_image").remove();
+                                work_canvas.id = "work_image";
+                                drop_zone.appendChild(work_canvas);
+                            }
+                        };
+                        reader.readAsDataURL(imgFile);
+                        break;
+                    }
+                }
+            }
+
+            function processImage() {
+                console.log("processImage");
+                var image = document.getElementById("dropped_image");
+                var ctx = image.getContext("2d");
+                var image_data = ctx.getImageData(0, 0, image.width, image.height)
+                var data = image_data.data;
+                var threshold = $("#slider").slider("value");
+                console.log(threshold);
+                for (var i=0; i<data.length; i+=4) {
+                    var grey = (255-data[i+0] + 255-data[i+1] + 255-data[i+2]) / 3;
+                    grey = grey > threshold ? 255 : 0;
+                    data[i+0] = 0;
+                    data[i+1] = 0;
+                    data[i+2] = 0;
+                    data[i+3] = grey;
+                }
+                var work_image = document.getElementById("work_image");
+                var work_ctx = work_image.getContext("2d");
+                work_ctx.putImageData(image_data, 0, 0);
+            }
+
+            $( function() {
+                var handle = $("#custom-handle");
+                $("#slider").slider({
+                    range: "max",
+                    min: 0,
+                    max: 255,
+                    value: 127,
+                    create: function() {
+                        handle.text( $(this).slider("value") );
+                    },
+                    slide: function(event, ui) {
+                        handle.text(ui.value);
+                    },
+                    change: function(event, ui) {
+                        processImage();
+                    }
+                });
+            } );
+        </script>
+    </footer>
+</html>
