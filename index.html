@@ -47,6 +47,7 @@
     </body>
     <footer>
         <script>
+            var max_height=48, max_width=180;
             var drop_zone = document.getElementById("drop_zone");
             var accepted_types = ["image/png", "image/jpeg"]
             drop_zone.ondragover = function (e) {e.preventDefault(); console.log("ondragover");};
@@ -67,15 +68,21 @@
 
                             image.onload = function (event) {
                                 var canvas = document.createElement("canvas");
-                                canvas.width = image.width;
-                                canvas.height = image.height;
+                                // Resizing
+                                var w_ratio = image.width / max_width;
+                                var h_ratio = image.height / max_height;
+                                var ratio = w_ratio > h_ratio ? w_ratio : h_ratio;
+                                canvas.width = image.width / ratio;
+                                canvas.height = image.height / ratio;
+                                console.log(`resize: (${image.width}, ${image.height}) -> (${canvas.width}, ${canvas.height})`);
+
                                 var ctx = canvas.getContext("2d");
-                                ctx.drawImage(image, 0, 0);
+                                ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
                                 $("#dropped_image").remove();
                                 canvas.id = "dropped_image";
                                 drop_zone.appendChild(canvas);
-                                drop_zone.style.width = ""+image.width+"px";
-                                drop_zone.style.height = ""+image.height+"px";
+                                drop_zone.style.width = ""+canvas.width+"px";
+                                drop_zone.style.height = ""+canvas.height+"px";
 
                                 var work_canvas = document.createElement("canvas");
                                 work_canvas.width = canvas.width;
