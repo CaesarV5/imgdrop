@@ -32,10 +32,10 @@
     <title>Image</title>
     <p>Drop image file here :</p>
     <div id="drop_zone"></div>
+    <p>Threshold :</p>
     <div id="slider">
         <div id="custom-handle" class="ui-slider-handle"></div>
     </div>
-    <button onclick="processImage()">Process</button>
     <body>
     </body>
     <footer>
@@ -75,6 +75,8 @@
                                 $("#work_image").remove();
                                 work_canvas.id = "work_image";
                                 drop_zone.appendChild(work_canvas);
+
+                                processImage();
                             }
                         };
                         reader.readAsDataURL(imgFile);
@@ -85,23 +87,24 @@
 
             function processImage() {
                 console.log("processImage");
-                var image = document.getElementById("dropped_image");
-                var ctx = image.getContext("2d");
-                var image_data = ctx.getImageData(0, 0, image.width, image.height)
-                var data = image_data.data;
-                var threshold = $("#slider").slider("value");
-                console.log(threshold);
-                for (var i=0; i<data.length; i+=4) {
-                    var grey = (255-data[i+0] + 255-data[i+1] + 255-data[i+2]) / 3;
-                    grey = grey > threshold ? 255 : 0;
-                    data[i+0] = 0;
-                    data[i+1] = 0;
-                    data[i+2] = 0;
-                    data[i+3] = grey;
+                if ($("#dropped_image").length) {
+                    var image = document.getElementById("dropped_image");
+                    var ctx = image.getContext("2d");
+                    var image_data = ctx.getImageData(0, 0, image.width, image.height)
+                    var data = image_data.data;
+                    var threshold = $("#slider").slider("value");
+                    for (var i=0; i<data.length; i+=4) {
+                        var grey = (255-data[i+0] + 255-data[i+1] + 255-data[i+2]) / 3;
+                        grey = grey > threshold ? 255 : 0;
+                        data[i+0] = 0;
+                        data[i+1] = 0;
+                        data[i+2] = 0;
+                        data[i+3] = grey;
+                    }
+                    var work_image = document.getElementById("work_image");
+                    var work_ctx = work_image.getContext("2d");
+                    work_ctx.putImageData(image_data, 0, 0);
                 }
-                var work_image = document.getElementById("work_image");
-                var work_ctx = work_image.getContext("2d");
-                work_ctx.putImageData(image_data, 0, 0);
             }
 
             $( function() {
