@@ -7,8 +7,13 @@
         <style>
             #drop_zone {
                 border: 10px dashed #ccc;
-                min-width: 300px;
-                min-height: 300px;
+                width: 300px;
+                height: 300px;
+            }
+            #work_zone {
+                border: 10px dashed #ccc;
+                width: 300px;
+                height: 300px;
             }
             #drop_zone:hover {
                 border: 10px dashed #0c0;
@@ -36,6 +41,8 @@
     <div id="slider">
         <div id="custom-handle" class="ui-slider-handle"></div>
     </div>
+    <p>Preview :</p>
+    <div id="work_zone"></div>
     <body>
     </body>
     <footer>
@@ -44,6 +51,7 @@
             var accepted_types = ["image/png", "image/jpeg"]
             drop_zone.ondragover = function (e) {e.preventDefault(); console.log("ondragover");};
             drop_zone.ondrop = function (e) {e.preventDefault(); console.log("ondrop"); readFiles(e.dataTransfer.files);};
+            var work_zone = document.getElementById("work_zone");
 
             function readFiles(files) {
                 console.log(files);
@@ -66,15 +74,19 @@
                                 $("#dropped_image").remove();
                                 canvas.id = "dropped_image";
                                 drop_zone.appendChild(canvas);
+                                drop_zone.style.width = ""+image.width+"px";
+                                drop_zone.style.height = ""+image.height+"px";
 
                                 var work_canvas = document.createElement("canvas");
-                                work_canvas.width = image.width;
-                                work_canvas.height = image.height;
+                                work_canvas.width = canvas.width;
+                                work_canvas.height = canvas.height;
                                 var work_ctx = work_canvas.getContext("2d");
-                                work_ctx.drawImage(image, 0, 0);
+                                work_ctx.drawImage(canvas, 0, 0);
                                 $("#work_image").remove();
                                 work_canvas.id = "work_image";
-                                drop_zone.appendChild(work_canvas);
+                                work_zone.appendChild(work_canvas);
+                                work_zone.style.width = ""+canvas.width+"px";
+                                work_zone.style.height = ""+canvas.height+"px";
 
                                 processImage();
                             }
