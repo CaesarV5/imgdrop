@@ -175,7 +175,10 @@
                     var work_data = work_ctx.getImageData(0, 0, width, height);
                     var data = work_data.data;
 
-                    var line_padding = "0".repeat(8 - width%8);
+                    var line_padding = "";
+                    if (width%8 != 0) {
+                        line_padding = "0".repeat(8 - width%8);
+                    }
                     var cmd = pad(height, 3) + pad(width, 3);
                     for (var line=0; line<height; line++) {
                         var line_hex = ""; // hex line
