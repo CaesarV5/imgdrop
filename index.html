@@ -61,7 +61,7 @@
                 for (var i=0; i<files.length; i++) {
                     var imgFile = files[i];
                     console.log(imgFile.type);
-                    if ($.inArray(imgFile.type, accepted_types)) {
+                    if ($.inArray(imgFile.type, accepted_types) >= 0) {
                         var reader = new FileReader();
                         reader.onload = function (event) {
                             console.log("onload");
